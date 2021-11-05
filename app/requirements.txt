@@ -2,3 +2,5 @@ spacy==3.1.4
 pdfminer.six==20211012
 fastapi==0.70.0
 uvicorn==0.15.0
+python-multipart
+flask

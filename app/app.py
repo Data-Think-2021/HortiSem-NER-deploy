@@ -110,5 +110,9 @@ async def predict_text(text):
     return {"text":text,"ents":ents["ents"]}
    
 
+@app.get("/")
+def index():
+    return "foo"   
+
 if __name__ == "__main__":
     uvicorn.run("app:app", reload=True, debug=True)  
