@@ -1,0 +1,6 @@
+__pycache__
+.spacy3-env
+.vscode
+set_env.txt
+templates
+static
