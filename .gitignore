@@ -4,3 +4,4 @@ __pycache__
 set_env.txt
 templates
 static
+upload_folder

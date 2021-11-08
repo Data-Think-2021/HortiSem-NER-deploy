@@ -5,4 +5,4 @@ WORKDIR /app
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD [ "python", "flask_test.py" ]
+CMD [ "python", "app.py" ]

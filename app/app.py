@@ -14,7 +14,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi import Request, Response
 from starlette.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from pydantic import BaseModel
 import uvicorn 
 
 # crf_model = joblib.load("/model/nerCRF.joblib") 
@@ -25,6 +25,8 @@ app = FastAPI(
     description="{{HortiSem.project_short_description}}"
 )
 
+class Data(BaseModel):
+    text: str
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 # templates = Jinja2Templates(directory="templates")
 
@@ -61,33 +63,35 @@ def preprocess_pdf(string):
         string_final += line
     return string_final
 
-def predict(text, nlp_model):
-    doc = nlp_model(text)
-    ents = []
-    for ent in doc.ents:
-        ents.append({"entity":ent.text, "label":ent.label_})    
-    return {"ents":ents}
-
 # def predict(text, nlp_model):
 #     doc = nlp_model(text)
-#     entities = {
-#         "Kultur": [], 
-#         "Erreger": [],
-#         "Mittel": [],
-#         "BBCH_Stadium": [],
-#         "Ort": [],
-#        }
+#     ents = []
 #     for ent in doc.ents:
-#         if ent.text in entities[ent.label_]:
-#             pass
-#         else:
-#             entities[ent.label_].append(ent.text)
-#     return entities
+#         ents.append({"entity":ent.text, "label":ent.label_})    
+#     return {"ents":ents}
 
-@app.post("/predict/")
+def predict(text, nlp_model):
+    doc = nlp_model(text)
+    entities = {
+        "Kultur": [], 
+        "Erreger": [],
+        "Mittel": [],
+        "BBCH_Stadium": [],
+        "Ort": [],
+        "Auftreten":[],
+       }
+    for ent in doc.ents:
+        if ent.text in entities[ent.label_]:
+            pass
+        else:
+            entities[ent.label_].append(ent.text)
+    return entities
+
+@app.post("/predict_pdf/")
 async def create_upload_file(file: UploadFile = File(...)):  
     # the user can upload a pdf file or direct give text . 
     file_object = file.file
+    
     #create empty file to copy the file_object to
     Pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
     
@@ -100,19 +104,14 @@ async def create_upload_file(file: UploadFile = File(...)):
     input_text = read_pdf(Pdf_path)
     # Predict
     ents = predict(input_text,nlp)
-    # print(ents)
-    return {"filename": file.filename, "text":input_text,"ents":ents["ents"]}
+    
+    return {"filename": file.filename, "text":input_text,"ents":ents}
 
-@app.get("/main/")
-async def predict_text(text):
-    ents = predict(text,nlp)
-    # print(ents)
-    return {"text":text,"ents":ents["ents"]}
+@app.post("/predict_text/")
+async def predict_text(data: Data):
+    ents = predict(data.text,nlp)
+    return {"text":data.text,"ents":ents}
    
 
-@app.get("/")
-def index():
-    return "foo"   
-
 if __name__ == "__main__":
-    uvicorn.run("app:app", reload=True, debug=True)  
+    uvicorn.run("app:app", port=5000, reload=True, debug=True)  
