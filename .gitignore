@@ -5,3 +5,4 @@ set_env.txt
 templates
 static
 upload_folder
+/app/flask_test.py 

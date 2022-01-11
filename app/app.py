@@ -1,7 +1,9 @@
+import spacy
 import os
+import shutil
+import re
 from io import StringIO
 from pathlib import Path
-from re import T
 from tempfile import NamedTemporaryFile
 
 from pdfminer.converter import TextConverter
@@ -11,8 +13,6 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
-import spacy
-import shutil
 from fastapi import FastAPI, File, UploadFile
 from fastapi import Request, Response
 from starlette.staticfiles import StaticFiles
@@ -92,13 +92,16 @@ def predict(text, nlp_model):
         "Mittel": [],
         "BBCH_Stadium": [],
         "Ort": [],
-        "Auftreten":[],
+        "Auftreten":[]
        }
     for ent in doc.ents:
-        if ent.text in entities[ent.label_]:
+        new_ent = re.sub(r'\n\r?', ' ', ent.text)
+        if ent.label_ == "Witterung" or ent.label_ == "Zeit":
+            pass
+        elif new_ent in entities[ent.label_]:
             pass
         else:
-            entities[ent.label_].append(ent.text)
+            entities[ent.label_].append(new_ent)
     return entities
 
 @app.post("/predict_pdf/")
