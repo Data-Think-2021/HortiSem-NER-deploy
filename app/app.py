@@ -33,7 +33,7 @@ class Data(BaseModel):
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 # templates = Jinja2Templates(directory="templates")
 
-nlp = spacy.load(os.getcwd()+"/model/model_20211206/model-best")
+nlp = spacy.load(os.getcwd()+"/model/ml_rule_model_20211206")
 
 # UPLOAD_FOLDER = os.getcwd()+"/upload_folder"
 
